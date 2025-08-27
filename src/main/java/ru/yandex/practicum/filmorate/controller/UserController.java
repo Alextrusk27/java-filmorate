@@ -7,10 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/users")
@@ -35,10 +32,12 @@ public class UserController {
 
     @PutMapping
     public User update(@RequestBody User newUser) {
-        if (newUser.getId() == null)
+        if (newUser.getId() == null) {
             throw new ValidationException("ID пользователя не указан");
-        if (!users.containsKey(newUser.getId()))
+        }
+        if (!users.containsKey(newUser.getId())) {
             throw new NotFoundException("пользователь с ID " + newUser.getId() + " не найден");
+        }
         userValidator(newUser);
         User oldUser = users.get(newUser.getId());
         Optional.ofNullable(newUser.getName())
@@ -46,8 +45,9 @@ public class UserController {
                 .ifPresent(oldUser::setName);
         oldUser.setLogin(newUser.getLogin());
         oldUser.setEmail(newUser.getEmail());
-        if (newUser.getBirthday() != null)
+        if (newUser.getBirthday() != null) {
             oldUser.setBirthday(newUser.getBirthday());
+        }
         log.info("Изменение данных пользователя {} ID {} завершено", oldUser.getName(), oldUser.getId());
         return oldUser;
     }
@@ -55,21 +55,23 @@ public class UserController {
     @GetMapping
     public Collection<User> getAll() {
         log.info("Получение списка фильмов");
-        return users.values();
+        return new ArrayList<>(users.values());
     }
 
     public void userValidator(User user) {
         log.debug("Валидация пользователя");
         if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().codePoints()
-                .anyMatch(Character::isWhitespace))
+                .anyMatch(Character::isWhitespace)) {
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
-
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@"))
+        }
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-
-        if (user.getBirthday() != null)
-            if (user.getBirthday().isAfter(LocalDate.now()))
+        }
+        if (user.getBirthday() != null) {
+            if (user.getBirthday().isAfter(LocalDate.now())) {
                 throw new ValidationException("Дата рождения не может быть в будущем");
+            }
+        }
         log.debug("Валидация пользователя завершена");
     }
 
