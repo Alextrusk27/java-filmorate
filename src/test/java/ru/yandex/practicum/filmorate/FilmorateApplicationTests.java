@@ -1,24 +1,37 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FilmorateApplicationTests {
 
     private Film film;
     private User user;
-    private final FilmController filmController = new FilmController();
-    private final UserController userController = new UserController();
+
+    private final InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
+    private final InMemoryUserStorage userStorage = new InMemoryUserStorage();
+
+    private Method filmValidator;
+    private Method userValidator;
+
+    @BeforeAll
+    public void initValidator() throws NoSuchMethodException {
+        filmValidator = InMemoryFilmStorage.class.getDeclaredMethod("filmValidator", Film.class);
+        filmValidator.setAccessible(true);
+        userValidator = InMemoryUserStorage.class.getDeclaredMethod("userValidator", User.class);
+        userValidator.setAccessible(true);
+    }
 
     @BeforeEach
     void setup() {
@@ -39,22 +52,20 @@ class FilmorateApplicationTests {
 
     @Test
     void basicFilmValidation() {
-        Assertions.assertDoesNotThrow(() -> filmController.filmValidator(film),
+        Assertions.assertDoesNotThrow(() -> filmValidator.invoke(filmStorage, film),
                 "Валидатор фильмов не должен вернуть исключение");
     }
 
     @Test
     void filmNameCannotBeNull() {
         film.setName(null);
-        var exception = Assertions.assertThrows(ValidationException.class, () -> filmController.filmValidator(film));
-        Assertions.assertEquals("Название фильма не указано", exception.getMessage());
+        Assertions.assertEquals("Название фильма не указано", getReason(filmValidator, filmStorage, film));
     }
 
     @Test
     void filmNameCannotBeBlank() {
         film.setName(" ");
-        var exception = Assertions.assertThrows(ValidationException.class, () -> filmController.filmValidator(film));
-        Assertions.assertEquals("Название фильма не указано", exception.getMessage());
+        Assertions.assertEquals("Название фильма не указано", getReason(filmValidator, filmStorage, film));
     }
 
     @Test
@@ -63,72 +74,78 @@ class FilmorateApplicationTests {
                 "национального героя Уильяма Уоллеса, посвятившего себя борьбе с англичанами при короле Эдварде " +
                 "Длинноногом. Он рано лишился отца, погибшего от рук англичан, и его забрал к себе дядя Оргайл, " +
                 "который дал ему хорошее образование в Европе.");
-        var exception = Assertions.assertThrows(ValidationException.class, () -> filmController.filmValidator(film));
-        Assertions.assertEquals("Описание фильма не должно превышать 200 символов", exception.getMessage());
+        Assertions.assertEquals("Описание фильма не должно превышать 200 символов",
+                getReason(filmValidator, filmStorage, film));
     }
 
     @Test
     void filmReleaseDateCannotBeBefore28Dec1985() {
         film.setReleaseDate(LocalDate.parse("1805-05-18"));
-        var exception = Assertions.assertThrows(ValidationException.class, () -> filmController.filmValidator(film));
-        Assertions.assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года", exception.getMessage());
+        Assertions.assertEquals("Дата релиза не может быть раньше 28 декабря 1895 года",
+                getReason(filmValidator, filmStorage, film));
     }
 
     @Test
     void filmDurationCannotBeLessThanZero() {
         film.setDuration(-5L);
-        var exception = Assertions.assertThrows(ValidationException.class, () -> filmController.filmValidator(film));
-        Assertions.assertEquals("Продолжительность фильма должна быть больше 0", exception.getMessage());
+        Assertions.assertEquals("Продолжительность фильма должна быть больше 0",
+                getReason(filmValidator, filmStorage, film));
     }
 
     @Test
     void basicUserValidation() {
-        Assertions.assertDoesNotThrow(() -> userController.userValidator(user),
+        Assertions.assertDoesNotThrow(() -> userValidator.invoke(userStorage, user),
                 "Валидатор пользователей не должен вернуть исключение");
     }
 
     @Test
     void userLoginCannotBeNull() {
         user.setLogin(null);
-        var exception = Assertions.assertThrows(ValidationException.class, () -> userController.userValidator(user));
-        Assertions.assertEquals("Логин не может быть пустым и содержать пробелы", exception.getMessage());
+        Assertions.assertEquals("Логин не может быть пустым и содержать пробелы",
+                getReason(userValidator, userStorage, user));
     }
 
     @Test
     void userLoginCannotBeBlank() {
         user.setLogin(" ");
-        var exception = Assertions.assertThrows(ValidationException.class, () -> userController.userValidator(user));
-        Assertions.assertEquals("Логин не может быть пустым и содержать пробелы", exception.getMessage());
+        Assertions.assertEquals("Логин не может быть пустым и содержать пробелы",
+                getReason(userValidator, userStorage, user));
     }
 
     @Test
     void userEmailCannotBeNull() {
         user.setEmail(null);
-        var exception = Assertions.assertThrows(ValidationException.class, () -> userController.userValidator(user));
         Assertions.assertEquals("Электронная почта не может быть пустой и должна содержать символ @",
-                exception.getMessage());
+                getReason(userValidator, userStorage, user));
     }
+
 
     @Test
     void userEmailCannotBeBlank() {
         user.setEmail(" ");
-        var exception = Assertions.assertThrows(ValidationException.class, () -> userController.userValidator(user));
         Assertions.assertEquals("Электронная почта не может быть пустой и должна содержать символ @",
-                exception.getMessage());
+                getReason(userValidator, userStorage, user));
     }
 
     @Test
     void userEmailMustIncludeAt() {
         user.setEmail("MelGibsonFun116yahoo.com");
-        var exception = Assertions.assertThrows(ValidationException.class, () -> userController.userValidator(user));
         Assertions.assertEquals("Электронная почта не может быть пустой и должна содержать символ @",
-                exception.getMessage());
+                getReason(userValidator, userStorage, user));
     }
 
     @Test
     void userBirthdayCannotBeInFuture() {
         user.setBirthday(LocalDate.now().plusDays(1));
-        var exception = Assertions.assertThrows(ValidationException.class, () -> userController.userValidator(user));
-        Assertions.assertEquals("Дата рождения не может быть в будущем", exception.getMessage());
+        Assertions.assertEquals("Дата рождения не может быть в будущем",
+                getReason(userValidator, userStorage, user));
+    }
+
+    private <T, E> String getReason(Method method, T storage, E entity) {
+        var exception = Assertions.assertThrows(InvocationTargetException.class, () ->
+                method.invoke(storage, entity));
+        Throwable cause = exception.getTargetException();
+        Assertions.assertInstanceOf(ValidationException.class, cause);
+        return cause.getMessage();
     }
 }
