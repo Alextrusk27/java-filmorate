@@ -20,11 +20,9 @@ public class InMemoryFilmStorage implements Storage<Film> {
 
     @Override
     public Film create(Film film) {
-        log.debug("Запрос на создание фильма");
         filmValidator(film);
         film.setId(getNextId());
         films.put(film.getId(), film);
-        log.info("Создан фильм {} ID {}", film.getName(), film.getId());
         return film;
     }
 
@@ -50,13 +48,11 @@ public class InMemoryFilmStorage implements Storage<Film> {
         if (film.getDuration() != null) {
             oldFilm.setDuration(film.getDuration());
         }
-        log.info("Изменение фильма {} ID {} завершено", oldFilm.getName(), oldFilm.getId());
         return oldFilm;
     }
 
     @Override
     public Collection<Film> getAll() {
-        log.info("Получение списка фильмов");
         return new ArrayList<>(films.values());
     }
 
@@ -70,7 +66,6 @@ public class InMemoryFilmStorage implements Storage<Film> {
     }
 
     private void filmValidator(Film film) {
-        log.debug("Валидация фильма");
         if (film.getName() == null || film.getName().isBlank()) {
             throw new ValidationException("Название фильма не указано");
         }
@@ -87,7 +82,6 @@ public class InMemoryFilmStorage implements Storage<Film> {
                 throw new ValidationException("Продолжительность фильма должна быть больше 0");
             }
         }
-        log.debug("Валидация фильма завершена");
     }
 
     private long getNextId() {
@@ -97,7 +91,6 @@ public class InMemoryFilmStorage implements Storage<Film> {
                 .max()
                 .orElse(0);
         ++currentMaxId;
-        log.debug("Сгенерирован Film ID {}", currentMaxId);
         return currentMaxId;
     }
 }

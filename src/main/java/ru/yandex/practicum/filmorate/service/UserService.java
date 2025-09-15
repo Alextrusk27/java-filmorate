@@ -17,14 +17,19 @@ public class UserService {
     private final Storage<User> userStorage;
 
     public User createUser(User user) {
-        return userStorage.create(user);
+        User result = userStorage.create(user);
+        log.info("Создан пользователь {} логин {} ID {}", result.getName(), result.getLogin(), result.getId());
+        return result;
     }
 
     public User updateUser(User user) {
-        return userStorage.update(user);
+        User result = userStorage.update(user);
+        log.info("Изменение данных пользователя ID {} завершено", result.getId());
+        return result;
     }
 
     public Collection<User> getAllUsers() {
+        log.info("Запрос на получение списка пользователей");
         return userStorage.getAll();
     }
 

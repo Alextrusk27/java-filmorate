@@ -17,14 +17,19 @@ public class FilmService {
     private final Storage<Film> filmStorage;
 
     public Film createFilm(Film film) {
-        return filmStorage.create(film);
+        Film result = filmStorage.create(film);
+        log.info("Создан фильм {} ID {}", film.getName(), film.getId());
+        return result;
     }
 
     public Film updateFilm(Film film) {
-        return filmStorage.update(film);
+        Film result = filmStorage.update(film);
+        log.info("Изменение фильма {} ID {} завершено", result.getName(), result.getId());
+        return result;
     }
 
     public Collection<Film> getAllFilms() {
+        log.info("Получение списка фильмов");
         return filmStorage.getAll();
     }
 

@@ -17,15 +17,12 @@ public class InMemoryUserStorage implements Storage<User> {
 
     @Override
     public User create(User user) {
-        log.debug("Запрос на создание пользователя");
         userValidator(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-            log.debug("Имя пользователя заменено на логин");
         }
         user.setId(getNextId());
         users.put(user.getId(), user);
-        log.info("Создан пользователь {} логин {} ID {}", user.getName(), user.getLogin(), user.getId());
         return user;
     }
 
@@ -47,13 +44,11 @@ public class InMemoryUserStorage implements Storage<User> {
         if (user.getBirthday() != null) {
             oldUser.setBirthday(user.getBirthday());
         }
-        log.info("Изменение данных пользователя {} ID {} завершено", oldUser.getName(), oldUser.getId());
         return oldUser;
     }
 
     @Override
     public Collection<User> getAll() {
-        log.info("Получение списка пользователей");
         return new ArrayList<>(users.values());
     }
 
@@ -67,7 +62,6 @@ public class InMemoryUserStorage implements Storage<User> {
     }
 
     private void userValidator(User user) {
-        log.debug("Валидация пользователя");
         if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().codePoints()
                 .anyMatch(Character::isWhitespace)) {
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
@@ -80,7 +74,6 @@ public class InMemoryUserStorage implements Storage<User> {
                 throw new ValidationException("Дата рождения не может быть в будущем");
             }
         }
-        log.debug("Валидация пользователя завершена");
     }
 
     private long getNextId() {
@@ -90,7 +83,6 @@ public class InMemoryUserStorage implements Storage<User> {
                 .max()
                 .orElse(0L);
         ++currentMaxId;
-        log.trace("Сгенерирован User ID {}", currentMaxId);
         return currentMaxId;
     }
 }
