@@ -1,11 +1,11 @@
 # java-filmorate
 
 ## Database (solution to intermediate task of sprint 12)
-![](Filmorate%20DB.png)
+![](docs/images/db_scheme.png)
 
  [Link to scheme on dbdiagram.io](https://dbdiagram.io/d/Filmorate-DB-68d3c7f5d2b621e422b50ba8)
 
-### Request examples
+### SQL request examples
 
 1. *Get all users*
 ```SQL
