@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
 
@@ -14,26 +16,25 @@ import java.util.Collection;
 public class FilmController {
 
     private final FilmService filmService;
-    private final UserService userService;
 
     @PostMapping
-    public Film create(@RequestBody Film film) {
-        return filmService.createFilm(film);
+    public Film create(@Valid @RequestBody NewFilmRequest request) {
+        return filmService.create(request);
     }
 
     @PutMapping
-    public Film update(@RequestBody Film film) {
-        return filmService.updateFilm(film);
+    public Film update(@Valid @RequestBody UpdateFilmRequest request) {
+        return filmService.update(request);
     }
 
     @GetMapping
     public Collection<Film> getAll() {
-        return filmService.getAllFilms();
+        return filmService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Film getFilm(@PathVariable final long id) {
-        return filmService.getFilmById(id);
+    public Film get(@PathVariable final long id) {
+        return filmService.get(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -41,7 +42,6 @@ public class FilmController {
             @PathVariable final long id,
             @PathVariable final long userId
     ) {
-        userService.getUserById(userId); // если пользователя нет, NotFoundException
         filmService.setLike(id, userId);
     }
 
@@ -50,7 +50,6 @@ public class FilmController {
             @PathVariable final long id,
             @PathVariable final long userId
     ) {
-        userService.getUserById(userId); // если пользователя нет, NotFoundException
         filmService.removeLike(id, userId);
     }
 
@@ -58,6 +57,6 @@ public class FilmController {
     public Collection<Film> getPopularFilms(
             @RequestParam(defaultValue = "10") final long count
     ) {
-        return filmService.getPopularFilms(count);
+        return filmService.getTopFilms(count);
     }
 }
