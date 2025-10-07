@@ -14,7 +14,7 @@ public interface FilmRepository {
 
     Film get(long id);
 
-    void setLike(long user_id, long film_id);
+    void setLike(long user_id, long filmId);
 
-    void removeLike(long user_id, long film_id);
+    void removeLike(long user_id, long filmId);
 }
