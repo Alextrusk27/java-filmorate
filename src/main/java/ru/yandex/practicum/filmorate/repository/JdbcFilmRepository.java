@@ -174,10 +174,10 @@ public class JdbcFilmRepository implements FilmRepository {
     }
 
     @Override
-    public void setLike(long film_id, long filmId) {
+    public void setLike(long filmId, long userId) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("film_id", film_id);
-        params.addValue("user_id", filmId);
+        params.addValue("film_id", filmId);
+        params.addValue("user_id", userId);
         jdbc.update("""
                 MERGE INTO LIKES (user_id, film_id)
                 KEY (user_id, film_id)
@@ -186,10 +186,10 @@ public class JdbcFilmRepository implements FilmRepository {
     }
 
     @Override
-    public void removeLike(long film_id, long filmId) {
+    public void removeLike(long filmId, long userId) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("film_id", film_id);
-        params.addValue("user_id", filmId);
+        params.addValue("film_id", filmId);
+        params.addValue("user_id", userId);
         jdbc.update("""
                 DELETE FROM LIKES
                 WHERE USER_ID = :user_id AND film_id = :film_id;
