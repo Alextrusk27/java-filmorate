@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ru.yandex.practicum.filmorate.service.FilmService.GET_ALL_FILMS;
+import static ru.yandex.practicum.filmorate.service.FilmService.DEFAULT_FILM_COUNT;
 
 @Slf4j
 @Repository
@@ -79,7 +79,7 @@ public class JdbcFilmRepository implements FilmRepository {
     public Collection<Film> getFilms(long count) {
         // получаем все фильмы без жанров
         List<Film> allFilms = new ArrayList<>();
-        if (count == GET_ALL_FILMS) {
+        if (count == DEFAULT_FILM_COUNT) {
             allFilms = jdbc.query("""
                         SELECT f.id,
                         f.name,
@@ -164,7 +164,7 @@ public class JdbcFilmRepository implements FilmRepository {
                     GROUP BY f.id
                     """, params, mapper);
             if (result != null) {
-                return saveGenres(result);
+                return getGenres(result);
             } else {
                 throw new NotFoundException("Фильм с ID: " + id + " не найден");
             }
@@ -218,12 +218,12 @@ public class JdbcFilmRepository implements FilmRepository {
                     INSERT INTO FILM_GENRES (film_id, genre_id)
                     VALUES (:film_id, :genre_id)
                     """, SqlParameterSourceUtils.createBatch(batchValues));
-            return saveGenres(film);
+            return getGenres(film);
         }
-        return saveGenres(film);
+        return getGenres(film);
     }
 
-    private Film saveGenres(Film film) {
+    private Film getGenres(Film film) {
         MapSqlParameterSource params = new MapSqlParameterSource("film_id", film.getId());
         GenreRowMapper genreRowMapper = new GenreRowMapper();
         // создаем поле с жанрами для дто

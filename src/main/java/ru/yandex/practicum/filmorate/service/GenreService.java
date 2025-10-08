@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.GenreRepository;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Slf4j
@@ -17,7 +18,8 @@ public class GenreService {
 
     public Collection<Genre> getAll() {
         log.info("Получение списка всех жанров");
-        return repository.getAll();
+        Collection<Genre> result = repository.getAll();
+        return new ArrayList<>(result);
     }
 
     public Genre get(long id) {

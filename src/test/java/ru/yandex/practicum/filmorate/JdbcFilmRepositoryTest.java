@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.repository.JdbcFilmRepository;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-import static ru.yandex.practicum.filmorate.service.FilmService.GET_ALL_FILMS;
+import static ru.yandex.practicum.filmorate.service.FilmService.DEFAULT_FILM_COUNT;
 
 @JdbcTest
 @DisplayName("JdbcFilmRepository")
@@ -39,7 +39,7 @@ public class JdbcFilmRepositoryTest extends JdbcBaseRepositoryTest {
         allTestFilms.add(getFilm(SECOND_FILM_ID));
         allTestFilms.add(getFilm(THIRD_FILM_ID));
 
-        Collection<Film> allFilms = filmRepository.getFilms(GET_ALL_FILMS);
+        Collection<Film> allFilms = filmRepository.getFilms(DEFAULT_FILM_COUNT);
 
         Assertions.assertThat(allTestFilms)
                 .usingRecursiveComparison()

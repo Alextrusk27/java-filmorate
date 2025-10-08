@@ -15,7 +15,7 @@ import java.util.Collection;
 @Service
 @AllArgsConstructor
 public class FilmService {
-    public static final long GET_ALL_FILMS = 0;
+    public static final long DEFAULT_FILM_COUNT = 0;
 
     private final FilmRepository repository;
 
@@ -33,7 +33,7 @@ public class FilmService {
 
     public Collection<Film> getAll() {
         log.info("Получение списка фильмов");
-        return repository.getFilms(GET_ALL_FILMS);
+        return repository.getFilms(DEFAULT_FILM_COUNT);
     }
 
     public Film get(long id) {

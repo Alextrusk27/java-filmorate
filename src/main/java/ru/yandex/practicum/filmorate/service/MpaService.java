@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.repository.MpaRepository;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Slf4j
@@ -17,7 +18,8 @@ public class MpaService {
 
     public Collection<Mpa> getAll() {
         log.info("Получение списка всех MPA");
-        return repository.getAll();
+        Collection<Mpa> result = repository.getAll();
+        return new ArrayList<>(result);
     }
 
     public Mpa get(long id) {
