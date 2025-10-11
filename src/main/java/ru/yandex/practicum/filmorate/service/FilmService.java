@@ -3,58 +3,56 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.Storage;
+import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
 import java.util.Collection;
-import java.util.Comparator;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class FilmService {
+    public static final long DEFAULT_FILM_COUNT = 0;
 
-    private final Storage<Film> filmStorage;
+    private final FilmRepository repository;
 
-    public Film createFilm(Film film) {
-        Film result = filmStorage.create(film);
-        log.info("Создан фильм {} ID {}", film.getName(), film.getId());
+    public Film create(NewFilmRequest request) {
+        Film result = repository.save(FilmMapper.mapToFilm(request));
+        log.info("Создан фильм {} ID {}", result.getName(), result.getId());
         return result;
     }
 
-    public Film updateFilm(Film film) {
-        Film result = filmStorage.update(film);
+    public Film update(UpdateFilmRequest request) {
+        Film result = repository.update(FilmMapper.updateFilmFields(request));
         log.info("Изменение фильма {} ID {} завершено", result.getName(), result.getId());
         return result;
     }
 
-    public Collection<Film> getAllFilms() {
+    public Collection<Film> getAll() {
         log.info("Получение списка фильмов");
-        return filmStorage.getAll();
+        return repository.getFilms(DEFAULT_FILM_COUNT);
     }
 
-    public Film getFilmById(long id) {
+    public Film get(long id) {
         log.info("Запрос на поиск фильма с ID {}", id);
-        return filmStorage.get(id);
+        return repository.get(id);
     }
 
     public void setLike(long id, long userId) {
-        Film film = getFilmById(id);
-        film.getLikes().add(userId);
+        repository.setLike(id, userId);
         log.info("Поставлен лайк фильму с ID {} пользователем с ID {}", id, userId);
     }
 
     public void removeLike(long id, long userId) {
-        Film film = getFilmById(id);
-        film.getLikes().remove(userId);
+        repository.removeLike(id, userId);
         log.info("Удален лайк с фильма с ID {} пользователем с ID {}", id, userId);
     }
 
-    public Collection<Film> getPopularFilms(long count) {
+    public Collection<Film> getTopFilms(long count) {
         log.info("Запрос на топ {} попурных фильмов", count);
-        return filmStorage.getAll().stream()
-                .sorted(Comparator.comparing((Film film) -> film.getLikes().size()).reversed())
-                .limit(count)
-                .toList();
+        return repository.getFilms(count);
     }
 }
